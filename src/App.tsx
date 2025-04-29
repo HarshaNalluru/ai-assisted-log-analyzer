@@ -18,19 +18,23 @@ function App() {
 
   // Load sample log file on component mount
   useEffect(() => {
-    fetch("/sample-amqp.log")
-      .then((response) => response.text())
-      .then((data) => {
+    const loadSample = async () => {
+      try {
+        const response = await fetch("/out.log");
+        const data = await response.text();
         setLogContent(data);
-        const logInsights = analyzeLogFile(data);
+        const logInsights = await analyzeLogFile(data);
         setInsights(logInsights);
-      })
-      .catch((error) => console.error("Error loading sample log:", error));
+      } catch (error) {
+        console.error("Error loading sample log:", error);
+      }
+    };
+    loadSample();
   }, []);
 
-  const handleFileUpload = (content: string) => {
+  const handleFileUpload = async (content: string) => {
     setLogContent(content);
-    const logInsights = analyzeLogFile(content);
+    const logInsights = await analyzeLogFile(content);
     setInsights(logInsights);
   };
   return (

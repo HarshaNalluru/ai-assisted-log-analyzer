@@ -1,9 +1,9 @@
-/**
- * This file contains functions to analyze log data and generate insights.
- * In a real-world application, these functions would likely call an LLM API,
- * but for this demo, we'll use mock implementations.
- */
 
+import { AzureKeyCredential } from "@azure/core-auth";
+import getClient, { isUnexpected } from "@azure-rest/ai-inference";
+
+const azureOpenAIEndpoint = process.env.REACT_APP_AZURE_OPENAI_ENDPOINT || "";
+const azureOpenAIKey = process.env.REACT_APP_AZURE_OPENAI_KEY || "";
 interface LogInsight {
     summary: string;
     details: InsightItem[];
@@ -16,81 +16,63 @@ export interface InsightItem {
 }
 
 /**
- * Parses a log file and extracts insights
- * This is a mock implementation - in a real system this would call an LLM API
+ * Parses a log file and extracts structured insights using OpenAI
+ * Chunks the log and asks OpenAI to summarize each chunk and its purpose
  */
-export const analyzeLogFile = (logContent: string): LogInsight => {
+export const analyzeLogFile = async (logContent: string): Promise<LogInsight> => {
+    const inferenceClient = getClient(
+        azureOpenAIEndpoint,
+        new AzureKeyCredential(azureOpenAIKey)
+    );
+    // Split log into chunks of ~50 lines for context
     const lines = logContent.split('\n');
-    const insightItems: InsightItem[] = [];
-
-    // Count message types
-    let infoCount = 0;
-    let warnCount = 0;
-    let errorCount = 0;
-
-    // Count processed messages
-    let messagesProcessed = 0;
-    let messagesFailed = 0;
-
-    // Track network issues
-    let networkIssues = false;
-
-    // Parse logs
-    lines.forEach(line => {
-        if (line.includes('INFO')) infoCount++;
-        if (line.includes('WARN')) warnCount++;
-        if (line.includes('ERROR')) errorCount++;
-
-        if (line.includes('Message processed successfully')) messagesProcessed++;
-        if (line.includes('Failed to process message')) messagesFailed++;
-
-        if (line.includes('Network latency spike detected')) {
-            networkIssues = true;
-            const timestamp = line.match(/\[(.*?)\]/)?.[1] || '';
-            insightItems.push({
-                type: 'warning',
-                message: 'Network latency spike detected, which may have caused message processing delays',
-                timestamp,
-            });
-        }
-
-        if (line.includes('Message processing failed after retry')) {
-            const msgId = line.match(/msg-\d+/)?.[0] || 'unknown';
-            const timestamp = line.match(/\[(.*?)\]/)?.[1] || '';
-            insightItems.push({
-                type: 'error',
-                message: `Message ${msgId} failed processing even after retry and was sent to the dead letter queue`,
-                timestamp,
-            });
-        }
-
-        if (line.includes('Channel flow control activated')) {
-            const timestamp = line.match(/\[(.*?)\]/)?.[1] || '';
-            insightItems.push({
-                type: 'info',
-                message: 'Flow control was temporarily activated, indicating the consumer was not keeping up with message rate',
-                timestamp,
-            });
-        }
-    });
-
-    // Add summary items
-    if (messagesProcessed > 0) {
-        insightItems.push({
-            type: 'success',
-            message: `Successfully processed ${messagesProcessed} messages`,
-        });
+    const chunkSize = 180;
+    const chunks: string[] = [];
+    for (let i = 0; i < lines.length; i += chunkSize) {
+        chunks.push(lines.slice(i, i + chunkSize).join('\n'));
     }
 
-    // Create summary
-    const summary = `This log contains ${lines.length} entries (${infoCount} info, ${warnCount} warnings, ${errorCount} errors). ` +
-        `${messagesProcessed} messages were successfully processed and ${messagesFailed} failed. ` +
-        `${networkIssues ? 'Network instability was detected during this period.' : 'No network issues were detected.'}`;
+    // Prepare prompt for each chunk
+    const chunkSummaries: { chunk: string; summary: string }[] = [];
+    for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        const prompt = `You are an expert at analyzing Azure SDK and rhea logs.\n\nGiven the following logs, identify logical chunks and describe what is being attempted or achieved in each of those chunks, and summarize any errors, warnings, or important events.\n\nReturn a JSON object with:\n- chunk_range: [begin_line, end_line]\n- purpose: a concise description of what this chunk is doing\n- details: a list of key events/errors/warnings.\n\nLog chunk (lines ${i * chunkSize + 1}-${Math.min((i + 1) * chunkSize, lines.length)}):\n${chunk}`;
+        try {
+            const completion = await inferenceClient.path("/chat/completions").post({
+                body: {
+                    model: "gpt-4.1",
+                    messages: [
+                        { role: "system", content: "You are a helpful assistant for log analysis." },
+                        { role: "user", content: prompt }
+                    ],
+                    temperature: 0.2,
+                    max_tokens: 10000
+                }
+            });
 
-    return {
-        summary,
-        details: insightItems,
-    };
+            if (isUnexpected(completion)) {
+                console.error(`Unexpected response here: ${completion.status} - ${completion.body}`);
+                throw new Error(`Unexpected response from OpenAI API: ${completion.status} - ${completion.body}`);
+            }
+
+            console.log("Response from Azure OpenAI:", JSON.stringify(completion.body));
+            const summary = completion.body.choices[0]?.message?.content || "No analysis provided.";
+            console.log("Analysis from Azure OpenAI:");
+            console.log(summary);
+
+            chunkSummaries.push({ chunk, summary });
+        } catch (e) {
+            chunkSummaries.push({ chunk, summary: "OpenAI API error: " + (e as Error).message });
+        }
+    }
+
+    // Aggregate summaries
+    const details: InsightItem[] = chunkSummaries.map((c, idx) => ({
+        type: 'info',
+        message: `Chunk [Lines ${idx * chunkSize + 1}-${Math.min((idx + 1) * chunkSize, lines.length)}]: ${c.summary}`
+    }));
+    const summary = `Log analyzed in ${chunks.length} chunks. Each chunk summarizes what is being attempted and key events.`;
+    return { summary, details };
 };
 
 /**
