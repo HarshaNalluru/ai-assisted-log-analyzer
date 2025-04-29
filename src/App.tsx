@@ -23,8 +23,9 @@ function App() {
         const response = await fetch("/out.log");
         const data = await response.text();
         setLogContent(data);
-        const logInsights = await analyzeLogFile(data);
-        setInsights(logInsights);
+        await analyzeLogFile(data, (partial) => {
+          setInsights(partial);
+        });
       } catch (error) {
         console.error("Error loading sample log:", error);
       }
@@ -34,8 +35,10 @@ function App() {
 
   const handleFileUpload = async (content: string) => {
     setLogContent(content);
-    const logInsights = await analyzeLogFile(content);
-    setInsights(logInsights);
+    setInsights({ summary: "Analyzing...", details: [] });
+    await analyzeLogFile(content, (partial) => {
+      setInsights(partial);
+    });
   };
   return (
     <div className="App min-h-screen flex flex-col bg-gray-100">

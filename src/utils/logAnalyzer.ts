@@ -20,7 +20,10 @@ const azureOpenAIKey = process.env.REACT_APP_AZURE_OPENAI_KEY || "";
  * Parses a log file and extracts structured insights using OpenAI
  * Chunks the log and asks OpenAI to summarize each chunk and its purpose
  */
-export const analyzeLogFile = async (logContent: string): Promise<LogInsight> => {
+export const analyzeLogFile = async (
+    logContent: string,
+    onChunk?: (partial: LogInsight) => void
+): Promise<LogInsight> => {
     const inferenceClient = getClient(
         azureOpenAIEndpoint,
         new AzureKeyCredential(azureOpenAIKey),
@@ -70,6 +73,11 @@ export const analyzeLogFile = async (logContent: string): Promise<LogInsight> =>
                 console.warn("Unexpected format from OpenAI response", parsed);
             }
             chunkSummaries.push({ chunkIndex: i, chunkRange, subchunks });
+            // Call the callback with the current state for dynamic rendering
+            if (onChunk) {
+                const partialSummary = `Log analyzed in ${chunks.length} chunks. Each chunk summarizes what is being attempted and key events.`;
+                onChunk({ summary: partialSummary, details: [...chunkSummaries] });
+            }
         } catch (e) {
             throw Error(`${chunk}: "error" ${e}`);
         }
