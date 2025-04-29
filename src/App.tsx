@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import LogViewer from "./components/LogViewer";
-import InsightPanel from "./components/InsightPanel";
+import InsightPanel, { ChunkGroup } from "./components/InsightPanel";
 import QueryPanel from "./components/QueryPanel";
 import FileUploader from "./components/FileUploader";
-import { analyzeLogFile, InsightItem } from "./utils/logAnalyzer";
+import { analyzeLogFile } from "./utils/logAnalyzer";
 
 function App() {
   const [logContent, setLogContent] = useState<string>("");
   const [insights, setInsights] = useState<{
     summary: string;
-    details: InsightItem[];
+    details: ChunkGroup[];
   }>({
     summary: "No logs loaded yet.",
     details: [],
@@ -57,7 +57,7 @@ function App() {
             <LogViewer logContent={logContent} />
           </div>
           <div className="float-child">
-            <div className="bg-white rounded-lg shadow overflow-hidden h-[50vh]">
+            <div className="bg-white rounded-lg shadow overflow-hidden h-[60vh]">
               <InsightPanel insights={insights} />
             </div>
             <QueryPanel logContent={logContent} />

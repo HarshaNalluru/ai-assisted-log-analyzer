@@ -1,19 +1,20 @@
-
 import { AzureKeyCredential } from "@azure/core-auth";
 import getClient, { isUnexpected } from "@azure-rest/ai-inference";
+import { chunk_response_format, ChunkResponse } from "./chunkSchema";
+
+export interface ChunkGroup {
+    chunkIndex: number;
+    chunkRange: [number, number];
+    subchunks: ChunkResponse[];
+}
+
+export interface LogInsight {
+    summary: string;
+    details: ChunkGroup[];
+}
 
 const azureOpenAIEndpoint = process.env.REACT_APP_AZURE_OPENAI_ENDPOINT || "";
 const azureOpenAIKey = process.env.REACT_APP_AZURE_OPENAI_KEY || "";
-interface LogInsight {
-    summary: string;
-    details: InsightItem[];
-}
-
-export interface InsightItem {
-    type: 'info' | 'warning' | 'error' | 'success';
-    message: string;
-    timestamp?: string;
-}
 
 /**
  * Parses a log file and extracts structured insights using OpenAI
@@ -22,21 +23,23 @@ export interface InsightItem {
 export const analyzeLogFile = async (logContent: string): Promise<LogInsight> => {
     const inferenceClient = getClient(
         azureOpenAIEndpoint,
-        new AzureKeyCredential(azureOpenAIKey)
+        new AzureKeyCredential(azureOpenAIKey),
+        { apiVersion: "2025-03-01-preview" }
     );
     // Split log into chunks of ~50 lines for context
     const lines = logContent.split('\n');
-    const chunkSize = 180;
+    const chunkSize = 400;
     const chunks: string[] = [];
     for (let i = 0; i < lines.length; i += chunkSize) {
         chunks.push(lines.slice(i, i + chunkSize).join('\n'));
     }
 
     // Prepare prompt for each chunk
-    const chunkSummaries: { chunk: string; summary: string }[] = [];
+    const chunkSummaries: { chunkIndex: number, chunkRange: [number, number], subchunks: ChunkResponse[] }[] = [];
     for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
-        const prompt = `You are an expert at analyzing Azure SDK and rhea logs.\n\nGiven the following logs, identify logical chunks and describe what is being attempted or achieved in each of those chunks, and summarize any errors, warnings, or important events.\n\nReturn a JSON object with:\n- chunk_range: [begin_line, end_line]\n- purpose: a concise description of what this chunk is doing\n- details: a list of key events/errors/warnings.\n\nLog chunk (lines ${i * chunkSize + 1}-${Math.min((i + 1) * chunkSize, lines.length)}):\n${chunk}`;
+        const chunkRange: [number, number] = [i * chunkSize + 1, Math.min((i + 1) * chunkSize, lines.length)];
+        const prompt = `You are an expert at analyzing Azure SDK and rhea logs.\n\nGiven the following logs, identify logical chunks and describe what is being attempted or achieved in each of those chunks, and summarize any errors, warnings, or important events.\nLog chunk (lines ${chunkRange[0]}-${chunkRange[1]}):\n${chunk}`;
         try {
             const completion = await inferenceClient.path("/chat/completions").post({
                 body: {
@@ -46,33 +49,35 @@ export const analyzeLogFile = async (logContent: string): Promise<LogInsight> =>
                         { role: "user", content: prompt }
                     ],
                     temperature: 0.2,
-                    max_tokens: 10000
+                    max_tokens: 10000,
+                    response_format: chunk_response_format,
                 }
             });
 
             if (isUnexpected(completion)) {
-                console.error(`Unexpected response here: ${completion.status} - ${completion.body}`);
+                console.error(`Unexpected response here: ${completion.status} - ${JSON.stringify(completion.body)} `);
                 throw new Error(`Unexpected response from OpenAI API: ${completion.status} - ${completion.body}`);
             }
 
-            console.log("Response from Azure OpenAI:", JSON.stringify(completion.body));
             const summary = completion.body.choices[0]?.message?.content || "No analysis provided.";
-            console.log("Analysis from Azure OpenAI:");
-            console.log(summary);
-
-            chunkSummaries.push({ chunk, summary });
+            const parsed = JSON.parse(summary);
+            let subchunks: ChunkResponse[] = [];
+            if (Array.isArray(parsed)) {
+                subchunks = parsed;
+            } else if (parsed && Array.isArray(parsed.chunks)) {
+                subchunks = parsed.chunks;
+            } else {
+                console.warn("Unexpected format from OpenAI response", parsed);
+            }
+            chunkSummaries.push({ chunkIndex: i, chunkRange, subchunks });
         } catch (e) {
-            chunkSummaries.push({ chunk, summary: "OpenAI API error: " + (e as Error).message });
+            throw Error(`${chunk}: "error" ${e}`);
         }
     }
 
     // Aggregate summaries
-    const details: InsightItem[] = chunkSummaries.map((c, idx) => ({
-        type: 'info',
-        message: `Chunk [Lines ${idx * chunkSize + 1}-${Math.min((idx + 1) * chunkSize, lines.length)}]: ${c.summary}`
-    }));
     const summary = `Log analyzed in ${chunks.length} chunks. Each chunk summarizes what is being attempted and key events.`;
-    return { summary, details };
+    return { summary, details: chunkSummaries };
 };
 
 /**
