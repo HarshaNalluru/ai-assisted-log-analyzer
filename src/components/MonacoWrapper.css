@@ -1,0 +1,19 @@
+/* Custom styles for Monaco Editor to ensure proper height */
+.monaco-wrapper {
+  height: 100%;
+  min-height: 300px;
+  position: relative;
+}
+
+.monaco-wrapper .monaco-editor {
+  position: absolute !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 300px;
+}
+
+/* Make sure the Monaco Editor container has proper height */
+.monaco-editor .overflow-guard {
+  width: 100% !important;
+  height: 100% !important;
+}
