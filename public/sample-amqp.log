@@ -1,0 +1,32 @@
+[2025-04-28T12:00:01.123Z] INFO  [MessageBroker] Connection established with AMQP broker at amqp://message-broker.example.com:5672
+[2025-04-28T12:00:01.345Z] INFO  [MessageBroker] Channel opened successfully (channel=1)
+[2025-04-28T12:00:01.456Z] INFO  [MessageBroker] Declared queue: 'events-queue' (durable=true, exclusive=false, auto-delete=false)
+[2025-04-28T12:00:01.567Z] INFO  [MessageBroker] Starting to consume messages from queue: 'events-queue'
+[2025-04-28T12:00:05.123Z] INFO  [MessageProcessor] Received message: {"id":"msg-001","type":"USER_LOGIN","data":{"userId":"user123","timestamp":1714309205123}}
+[2025-04-28T12:00:05.234Z] INFO  [MessageProcessor] Processing message msg-001
+[2025-04-28T12:00:05.345Z] INFO  [MessageProcessor] Message processed successfully: msg-001
+[2025-04-28T12:00:08.456Z] INFO  [MessageProcessor] Received message: {"id":"msg-002","type":"DATA_UPDATE","data":{"resourceId":"res456","changes":{"status":"active"}}}
+[2025-04-28T12:00:08.567Z] INFO  [MessageProcessor] Processing message msg-002
+[2025-04-28T12:00:08.678Z] WARN  [MessageProcessor] Validation warning for message msg-002: Missing optional field 'priority'
+[2025-04-28T12:00:08.789Z] INFO  [MessageProcessor] Message processed successfully: msg-002
+[2025-04-28T12:00:15.890Z] INFO  [MessageProcessor] Received message: {"id":"msg-003","type":"SYSTEM_EVENT","data":{"eventType":"SCHEDULED_MAINTENANCE","startTime":1714309800000}}
+[2025-04-28T12:00:15.901Z] INFO  [MessageProcessor] Processing message msg-003
+[2025-04-28T12:00:16.012Z] ERROR [MessageProcessor] Failed to process message msg-003: Invalid event type 'SCHEDULED_MAINTENANCE'
+[2025-04-28T12:00:16.123Z] INFO  [MessageProcessor] Requeuing message for retry: msg-003
+[2025-04-28T12:00:19.234Z] INFO  [NetworkMonitor] Network latency spike detected: 450ms (threshold: 200ms)
+[2025-04-28T12:00:19.345Z] WARN  [NetworkMonitor] Potential network instability detected
+[2025-04-28T12:00:20.456Z] INFO  [MessageProcessor] Received message: {"id":"msg-003","type":"SYSTEM_EVENT","data":{"eventType":"SCHEDULED_MAINTENANCE","startTime":1714309800000}}
+[2025-04-28T12:00:20.567Z] INFO  [MessageProcessor] Processing message msg-003 (retry 1)
+[2025-04-28T12:00:20.678Z] ERROR [MessageProcessor] Failed to process message msg-003: Invalid event type 'SCHEDULED_MAINTENANCE'
+[2025-04-28T12:00:20.789Z] WARN  [MessageProcessor] Message processing failed after retry, sending to dead letter queue: msg-003
+[2025-04-28T12:00:25.890Z] INFO  [NetworkMonitor] Network latency returned to normal: 45ms
+[2025-04-28T12:00:30.901Z] INFO  [MessageProcessor] Received message: {"id":"msg-004","type":"USER_LOGOUT","data":{"userId":"user123","timestamp":1714309230901}}
+[2025-04-28T12:00:30.012Z] INFO  [MessageProcessor] Processing message msg-004
+[2025-04-28T12:00:30.123Z] INFO  [MessageProcessor] Message processed successfully: msg-004
+[2025-04-28T12:00:35.234Z] INFO  [MessageBroker] Heartbeat sent to broker
+[2025-04-28T12:00:40.345Z] INFO  [MessageBroker] Heartbeat received from broker
+[2025-04-28T12:00:50.456Z] INFO  [MessageBroker] Channel flow control activated (channel=1)
+[2025-04-28T12:00:55.567Z] INFO  [MessageBroker] Channel flow control deactivated (channel=1)
+[2025-04-28T12:01:00.678Z] INFO  [SystemMetrics] Current queue length: 145 messages
+[2025-04-28T12:01:00.789Z] INFO  [SystemMetrics] Processing rate: 250 messages/minute
+[2025-04-28T12:01:00.890Z] INFO  [SystemMetrics] Average processing time: 120ms per message
