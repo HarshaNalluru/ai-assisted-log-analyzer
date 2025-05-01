@@ -27,7 +27,30 @@ Advances in AI and the availability of scalable models (e.g., GPT-4.1) now make 
 - Dynamic, real-time rendering as logs are analyzed.
 - Support for multiple log formats and comparison of logs from different SDKs/languages.
 
-## Workflow / Architecture
+## Workflow
+
+- The application is built with React and TypeScript.
+- Uses Azure OpenAI via @azure-rest/ai-inference for chunk analysis.
+- Log chunking is optimized for API limits (e.g., 32K/1M token models).
+- Insights are rendered in a tree structure for easy navigation.
+- Architecture is extensible to other log types or protocols in the future.
+  ![alt text](image-1.png)
+
+## Benefits and Impact
+
+- Reduces incident analysis time for large AMQP logs by 50% or more, saving developer hours and reducing downtime.
+- Makes AMQP logs accessible to non-experts via natural language queries, broadening the tool's impact across support, SRE, and engineering teams, and can potentially be offered to customers in the future.
+- Enables rapid feedback and iteration during incident investigations, improving customer satisfaction and helping meet SLAs.
+- Supports cross-team collaboration by sharing structured insights, and can be adopted across language teams for broader organizational impact.
+- Frees engineering resources for higher-value work, improving overall productivity and reducing operational costs.
+
+## Feedback so far
+
+- Team feedback highlighted excitement about valuable insights from prompt and chunk size tweaks.
+- Shared with Richard, Swathi, Jeremy, and Deya; all found the tool promising for real-world AMQP logs. From a test log that Swathi shared, we were excited to see it provide actionable insights from simple tweaking of the prompts and chunk sizes!
+  ![alt text](image.png)
+
+## Architecture
 
 ```mermaid
 flowchart TD
@@ -58,27 +81,6 @@ flowchart TD
     B5 -- Processes Query (AI/Heuristic) --> B6
     B6 -- Query Response --> U4
 ```
-
-- The application is built with React and TypeScript.
-- Uses Azure OpenAI via @azure-rest/ai-inference for chunk analysis.
-- Log chunking is optimized for API limits (e.g., 32K/1M token models).
-- Insights are rendered in a tree structure for easy navigation.
-- Architecture is extensible to other log types or protocols in the future.
-  ![alt text](image-1.png)
-
-## Benefits and Impact
-
-- Reduces incident analysis time for large AMQP logs by 50% or more, saving developer hours and reducing downtime.
-- Makes AMQP logs accessible to non-experts via natural language queries, broadening the tool's impact across support, SRE, and engineering teams, and can potentially be offered to customers in the future.
-- Enables rapid feedback and iteration during incident investigations, improving customer satisfaction and helping meet SLAs.
-- Supports cross-team collaboration by sharing structured insights, and can be adopted across language teams for broader organizational impact.
-- Frees engineering resources for higher-value work, improving overall productivity and reducing operational costs.
-
-## Feedback so far
-
-- Team feedback highlighted excitement about valuable insights from prompt and chunk size tweaks.
-- Shared with Richard, Swathi, Jeremy, and Deya; all found the tool promising for real-world AMQP logs. From a test log that Swathi shared, we were excited to see it provide actionable insights from simple tweaking of the prompts and chunk sizes!
-  ![alt text](image.png)
 
 ## Future Enhancements / Next Steps
 
