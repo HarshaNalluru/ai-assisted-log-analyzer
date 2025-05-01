@@ -107,7 +107,7 @@ A single backend library, written in genAIScript, will power multiple frontends:
 4. **Cost Optimization:** Batch requests and leverage higher token models (e.g., GPT-4.1 1M tokens) for fewer, larger requests, minimizing API costs.
 5. **Advanced Preprocessing & Correlation:** Develop preprocessing to split and tag logs more intelligently, and algorithms for correlating non-consecutive events and errors across large AMQP logs.
 6. **Enhanced Cross-Language Support:** Improve comparison and correlation of logs from different SDKs/languages for unified analysis.
-7. **Azure SDK MCP Integration:** Connect with Maor's MCP server for deeper Azure insights and automated troubleshooting.
+7. **Azure SDK MCP Integration:** Connect with Maor's MCP server for deeper Azure insights and automated troubleshooting without leaving VS Code.
 8. **Multi-Frontend & Platform Support:** Enable integration with other UIs and platforms beyond the current React app, including CLI and MCP.
 9. **User Experience & Visualization:** Optimize UI for very large logs, add more visualization options, and improve overall usability for AMQP log analysis.
 10. **Broader Rollout & Adoption:** Pilot with more teams, collect feedback, and expand usage across the organization.
