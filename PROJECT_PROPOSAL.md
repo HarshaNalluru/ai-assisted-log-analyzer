@@ -34,6 +34,7 @@ Advances in AI and the availability of scalable models (e.g., GPT-4.1) now make 
 - Each chunk is summarized with its purpose and key events/errors in a structured format.
 - Expandable UI for exploring chunk and subchunk insights.
 - Query support for asking questions about the logs in natural language.
+- Dynamic, real-time rendering as logs are analyzed.
 - Support for multiple log formats and comparison of logs from different SDKs/languages.
 
 ## Workflow
