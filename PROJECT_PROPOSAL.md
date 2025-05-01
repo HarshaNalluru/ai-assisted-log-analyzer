@@ -42,6 +42,7 @@ Advances in AI and the availability of scalable models (e.g., GPT-4.1) now make 
 - The current prototype is built with React and TypeScript, but the core logic will be migrated to a backend library.
 - Uses Azure OpenAI via `@azure-rest/ai-inference` for chunk analysis.
 - Log chunking is optimized for API limits (e.g., 32K/1M token models).
+- Insights are rendered in a tree structure for easy navigation.
 - CLI and UI both consume the same backend library for consistency.
 - Architecture is extensible to other log types or protocols in the future.
   ![alt text](image-1.png)
