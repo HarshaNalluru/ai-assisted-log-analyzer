@@ -1,4 +1,4 @@
-# AMQP Log Analyzer: Project Proposal
+# AMQP Log Analyzer
 
 ## Introduction
 
@@ -32,7 +32,7 @@ Advances in AI and the availability of scalable models (e.g., GPT-4.1) now make 
 ```mermaid
 graph TD
     A[User Uploads AMQP Log File] --> B[Log Split into Logical Chunks]
-    B --> C[Chunks Sent to Azure OpenAI API with AMQP protocol context, engineered prompts]
+    B --> C[Chunks Sent to Azure OpenAI API (with AMQP protocol context & engineered prompts)]
     C --> D[AI Summarizes Each Chunk]
     D --> E[UI Renders Expandable Insights]
     E --> F[User Explores Insights / Asks Questions]
