@@ -42,7 +42,8 @@ export const analyzeLogFile = async (
     for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
         const chunkRange: [number, number] = [i * chunkSize + 1, Math.min((i + 1) * chunkSize, lines.length)];
-        const prompt = `You are an expert at analyzing Azure SDK and rhea logs.\n\nGiven the following logs, identify logical chunks and describe what is being attempted or achieved in each of those chunks, and summarize any errors, warnings, or important events.\nLog chunk (lines ${chunkRange[0]}-${chunkRange[1]}):\n${chunk}`;
+        const prompt = `You are an expert at analyzing AMQP logs.\n\nGiven the following logs, identify logical chunks and describe what is being attempted or achieved in each of those chunks, and summarize any errors, warnings, or important events. Focus on the correlation-id. Include the entity-name for receivers and senders in every response. \nLog chunk (lines ${chunkRange[0]}-${chunkRange[1]}):\n${chunk}`;
+        // const prompt = `You are an expert at analyzing AMQP logs.\n\nGiven the following logs, identify logical chunks, report any suspicious behavior and errors, warnings. Include the entity-name for receivers and senders in every response. Focus on the correlation-id. \nLog chunk (lines ${chunkRange[0]}-${chunkRange[1]}):\n${chunk}`;
         try {
             const completion = await inferenceClient.path("/chat/completions").post({
                 body: {
@@ -52,7 +53,6 @@ export const analyzeLogFile = async (
                         { role: "user", content: prompt }
                     ],
                     temperature: 0.2,
-                    max_tokens: 10000,
                     response_format: chunk_response_format,
                 }
             });
