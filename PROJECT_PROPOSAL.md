@@ -6,7 +6,7 @@ The AMQP Log Analyzer is a web application designed to provide AI-powered insigh
 
 ## Motivation
 
-AMQP-based messaging systems generate extremely large and complex logs, especially in distributed and high-throughput environments. This results in slow, error-prone, and often infeasible manual analysis, increasing operational costs and delaying resolution of ICMs and user issues. Past ICMs, user issues and stress tests have highlighted the growing scale and complexity of AMQP logs, with files often exceeding hundreds of thousands of lines. Manual analysis is not sustainable, developers have spent hours or days per incident, delaying root cause analysis and impacting customer experience. 
+AMQP-based messaging systems generate extremely large and complex logs, especially in distributed and high-throughput environments. This results in slow, error-prone, and often infeasible manual analysis, increasing operational costs and delaying resolution of ICMs and user issues. Past ICMs, user issues and stress tests have highlighted the growing scale and complexity of AMQP logs, with files often exceeding hundreds of thousands of lines. Manual analysis is not sustainable, developers have spent hours or days per incident, delaying root cause analysis and impacting customer experience.
 
 Advances in AI and the availability of scalable models (e.g., GPT-4.1) now make automated, high-quality log analysis feasible and cost-effective. The AMQP Log Analyzer leverages AI to automate the extraction of actionable insights, enabling teams to quickly diagnose issues, reduce investigation time, and improve operational efficiency. This solution directly enhances developer productivity for teams working with such logs, and helps us meet SLAs and deliver a better customer experience.
 
@@ -30,14 +30,33 @@ Advances in AI and the availability of scalable models (e.g., GPT-4.1) now make 
 ## Workflow / Architecture
 
 ```mermaid
-graph TD
-    A[User Uploads AMQP Log File] --> B[Log Split into Logical Chunks]
-    B --> C[Chunks Sent to Azure OpenAI API (with AMQP protocol context & engineered prompts)]
-    C --> D[AI Summarizes Each Chunk]
-    D --> E[UI Renders Expandable Insights]
-    E --> F[User Explores Insights / Asks Questions]
-    F --> G[Query Handled by AI on the logs and the analyzed chunks]
-    G --> H[AI Provides Answers / Insights]
+flowchart TD
+    subgraph UI[User Interface]
+        U1[File Uploader]
+        U2[Log Viewer]
+        U3[Insight Panel]
+        U4[Query Panel]
+    end
+
+    subgraph Backend[Backend & AI Services]
+        B1[Log Chunker]
+        B2[Prompt Engineering and AMQP protocol context]
+        B3[Azure OpenAI API]
+        B4[Chunk Summarizer]
+        B5[Query Processor]
+        B6[Azure OpenAI API]
+    end
+
+    U1 -- Uploads Log File --> B1
+    B1 -- Splits Log --> B2
+    B2 -- Sends Chunks & Prompts --> B3
+    B3 -- Returns Summaries --> B4
+    B4 -- Structured Insights --> U3
+    U2 -- Displays Raw Logs --> U3
+    U3 -- Shows Insights --> U4
+    U4 -- User Asks Questions --> B5
+    B5 -- Processes Query (AI/Heuristic) --> B6
+    B6 -- Query Response --> U4
 ```
 
 - The application is built with React and TypeScript.
