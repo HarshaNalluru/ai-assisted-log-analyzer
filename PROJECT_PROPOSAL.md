@@ -12,7 +12,7 @@ Advances in AI and the availability of scalable models (e.g., GPT-4.1) now make 
 
 ## Project Goals
 
-- Provide a reusable backend library (in genAIScript) for AMQP log analysis, designed for integration in multiple environments (CLI, UI(react app), CI, MCP, etc.).
+- Provide a backend library (in genAIScript) for AMQP log analysis, designed for integration in multiple environments (CLI, UI(react app), CI, MCP, etc.).
 - Enable users and systems to analyze large AMQP log files efficiently.
 - Support AI-generated summaries and detailed insights for each logical chunk of the log.
 - Offer both CLI tooling and an optional interactive UI for exploring log data.
@@ -39,7 +39,7 @@ Advances in AI and the availability of scalable models (e.g., GPT-4.1) now make 
 
 ## Workflow
 
-- The current prototype is built with React and TypeScript, but the core logic will be migrated to a reusable backend library.
+- The current prototype is built with React and TypeScript, but the core logic will be migrated to a backend library.
 - Uses Azure OpenAI via `@azure-rest/ai-inference` for chunk analysis.
 - Log chunking is optimized for API limits (e.g., 32K/1M token models).
 - CLI and UI both consume the same backend library for consistency.
