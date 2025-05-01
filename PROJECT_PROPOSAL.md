@@ -16,7 +16,7 @@ Advances in AI and the availability of scalable models (e.g., GPT-4.1) now make 
 - Enable users and systems to analyze large AMQP log files efficiently.
 - Support AI-generated summaries and detailed insights for each logical chunk of the log.
 - Investigate higher-level APIs to process the logs efficiently, avoiding manual chunking.
-- Offer both CLI tooling and an optional interactive UI for exploring log data.
+- Offer both CLI tooling and an interactive UI for exploring logs.
 - Support natural language queries about the logs and insights.
 - Make the architecture extensible for integration with Azure SDK MCP server, fault-injector, and other tools.
 
