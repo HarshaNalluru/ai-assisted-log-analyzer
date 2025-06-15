@@ -31,7 +31,7 @@ export const analyzeLogFile = async (
     );
     // Split log into chunks of ~50 lines for context
     const lines = logContent.split('\n');
-    const chunkSize = 400;
+    const chunkSize = 20;
     const chunks: string[] = [];
     for (let i = 0; i < lines.length; i += chunkSize) {
         chunks.push(lines.slice(i, i + chunkSize).join('\n'));
@@ -86,6 +86,37 @@ export const analyzeLogFile = async (
     // Aggregate summaries
     const summary = `Log analyzed in ${chunks.length} chunks. Each chunk summarizes what is being attempted and key events.`;
     return { summary, details: chunkSummaries };
+};
+
+/**
+ * Downloads the log insights as a JSON file
+ */
+export const downloadInsightsAsJSON = (insights: LogInsight, filename?: string): void => {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const defaultFilename = `log-insights-${timestamp}.json`;
+    const finalFilename = filename || defaultFilename;
+    
+    // Create downloadable JSON content with metadata
+    const downloadContent = {
+        metadata: {
+            generatedAt: new Date().toISOString(),
+            tool: "AI-assisted Log Analyzer",
+            version: "1.0.0"
+        },
+        insights: insights
+    };
+    
+    const jsonString = JSON.stringify(downloadContent, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = finalFilename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 };
 
 /**
