@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { downloadInsightsAsJSON } from "../utils/logAnalyzer";
 
 export interface ChunkResponse {
   chunk_range: [number, number];
@@ -33,10 +34,37 @@ const InsightPanel: React.FC<InsightPanelProps> = ({ insights }) => {
     setOpenSubchunks((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const handleDownload = () => {
+    downloadInsightsAsJSON(insights);
+  };
+
   return (
     <div className="h-full flex flex-col">
-      <div className="p-2 bg-gray-800 text-white">
+      <div className="p-2 bg-gray-800 text-white flex justify-between items-center">
         <h2 className="text-lg font-semibold">AI-Generated Insights</h2>
+        {insights.details && insights.details.length > 0 && (
+          <button
+            onClick={handleDownload}
+            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors"
+            title="Download insights as JSON file"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="inline-block h-4 w-4 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            Download
+          </button>
+        )}
       </div>
       <div className="flex-grow p-4 overflow-y-auto bg-gray-50">
         <div className="mb-6">

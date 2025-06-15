@@ -20,7 +20,7 @@ function App() {
   useEffect(() => {
     const loadSample = async () => {
       try {
-        const response = await fetch("/out.log");
+        const response = await fetch("/larry-v2-log-June-13.log");
         const data = await response.text();
         setLogContent(data);
         await analyzeLogFile(data, (partial) => {
