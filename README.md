@@ -1,4 +1,4 @@
-# AMQP Log Analyzer
+# AI assisted Log Analysis
 
 A web application for analyzing AMQP logs (e.g., from @azure/service-bus and @azure/event-hubs) using AI-powered insights. The app leverages Azure OpenAI to provide structured, chunks of summaries and details for uploaded log files.
 
